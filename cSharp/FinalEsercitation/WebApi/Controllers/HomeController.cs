@@ -6,11 +6,11 @@ namespace WebApi.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
+        private DataContext _context;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(DataContext context)
         {
-            _logger = logger;
+            _context = context;
         }
 
         public IActionResult Index()
@@ -18,15 +18,44 @@ namespace WebApi.Controllers
             return View();
         }
 
-        public IActionResult Privacy()
+        [HttpPost]
+        public IActionResult AddProductionInfo(MachineBindingTarget model)
         {
-            return View();
+            if (!ModelState.IsValid)
+            {
+                return View("Index",model);
+            }
+            else
+            {
+
+                Machine m = new Machine
+                {
+                    MachineId = model.MachineId,
+                    location = model.Location
+                };
+
+                Production p = new Production
+                {
+                    MachineId = model.MachineId,
+                    year = DateTime.Now.Year,
+                    month = DateTime.Now.Month,
+                    day = DateTime.Now.Day,
+                    hourOfDay = DateTime.Now.Hour,
+                    make = model.Make
+                };
+
+                _context.Machines.Add(m);
+                _context.Productions.Add(p);
+                _context.SaveChanges();
+
+                // Redirect a una pagina successiva o visualizza un messaggio di successo
+                return RedirectToAction("Success");
+            }
         }
 
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
+        public IActionResult Success()
         {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            return View("Index");
         }
     }
 }

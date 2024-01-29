@@ -56,27 +56,35 @@ namespace WebApi.Controllers
         [HttpGet("{machineId}")]
         public ActionResult<IEnumerable<object>> GetByMachineId(string machineId)
         {
+            // Trova la macchina nel contesto del database in base all'ID fornito
             var machineData = _context.Machines
                 .Where(m => m.MachineId == machineId)
+                // Per ogni macchina trovata, seleziona le produzioni associate trasformate in un nuovo oggetto anonimo
                 .Select(m => m.Productions.Select(p => new
-                    {
-                        p.ProductionId,
-                        p.MachineId,
-                        p.year,
-                        p.month,
-                        p.day,
-                        p.hourOfDay,
-                        p.make,
-                    })
-                ).ToList();
+                {
+                    p.ProductionId,
+                    p.MachineId,
+                    p.year,
+                    p.month,
+                    p.day,
+                    p.hourOfDay,
+                    p.make,
+                })
+                )
+                // Trasforma il risultato in una lista
+                .ToList();
 
+            // Verifica se la macchina è stata trovata nel database
             if (machineData == null)
             {
-                return NotFound(); // Restituisci un risultato 404 se la macchina non è trovata
+                // Se la macchina non è stata trovata, restituisci un risultato 404
+                return NotFound();
             }
 
+            // Se la macchina è stata trovata, restituisci le produzioni associate come risultato OK
             return Ok(machineData);
         }
+
 
 
 
