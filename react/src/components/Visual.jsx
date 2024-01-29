@@ -1,24 +1,75 @@
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import axios from "axios";
+import Swal from "sweetalert2";
+
 
 export default function Visual() {  
-        const [projectList, setProjectList] = useState([]);
-      
+        const [visual, setVisual] = useState([]);
+        const [locationFilter, setLocationFilter] = useState("");
         useEffect(() => {
-          fetchProjectList();
+          fetchVisual();
         }, []);
       
-        const fetchProjectList = () => {
-          axios.get("https://localhost:7138/api/projects")
+        const fetchVisual = () => {
+          axios.get("https://192.168.4.182:7014/api/Productions")
             .then(function (response) {
               // fulfilled
               console.log(response.data);
-              setProjectList(response.data);
+              setVisual(response.data);
             })
             .catch(function (error) {
               // rejected
               console.log(error);
             });
         }
+        function handleDelete(id) {
+            Swal.fire({
+              title: "Are you sure?",
+              text: "You cannnot undo this one",
+              icon: "warning",
+              showCancelButton: true,
+              confirmButtonText: "Yes, delete it",
+            }).then((result) => {
+              if (result.isConfirmed) {
+                axios
+                  .delete("https://192.168.4.182:7014/api/Productions/" + id)
+                  .then(function (response) {
+                    Swal.fire({
+                      icon: "success",
+                      title: "production deleted successfully",
+                      showConfirmButton: false,
+                      timer: 1500,
+                    });
+                    fetchVisual();
+                  })
+                  .catch(function (error) {
+                    Swal.fire({
+                      icon: "error",
+                      title: "An error occurred!",
+                      showConfirmButton: false,
+                      timer: 1500,
+                    });
+                    console.log(error);
+                  });
+              }
+            });
+          }
+
+          const handleLocationFilterChange = (e) => {
+            axios.get("https://192.168.4.182:7014/api/Productions/location/" + e.target.value)
+            .then(function (response) {
+              // fulfilled
+              console.log(response.data);
+              setVisual(response.data);
+            })
+            .catch(function (error) {
+              // rejected
+              console.log(error);
+            });
+          };
+        
+          
+
   return (
     <>
       <div className="container-sm">
@@ -26,34 +77,60 @@ export default function Visual() {
           <h1>table test</h1>
         </div>
 
-        <table className="table table-bordered">
+        <div className="mb-3">
+          <label htmlFor="locationFilter" className="form-label">Location Filter:</label>
+          <input
+            type="text"
+            className="form-control"
+            id="locationFilter"
+            value={locationFilter}
+            onChange={(e) => handleLocationFilterChange(e)}
+          />
+        </div>
+
+        <table className="table table">
           <thead>
             <tr>
               <th className="col">Productions</th>
-              <th className="col">Car</th>
-              <th className="col">Location</th>
-              <th className="col">Action</th>
+              <th className="col">Sensor</th>
+              <th className="col">year</th>
+              <th className="col">location</th>
+              <th className="col">month</th>
+              <th className="col">day</th>
+              <th className="col">hourofday</th>
+              <th className="col">make</th>
+              <th className="col">action</th>
+
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td>prod 1</td>
-              <td>car 1</td>
-              <td>turin</td>
-              <td>
-                <Link className="btn btn-secondary mt-3" to="/edit">
-                  EDIT
-                </Link>
-                <Link className="btn btn-secondary mt-3" to="/details">
-                  DETAILS
-                </Link>
+            {visual.map((visual, key) => {
+              return (
+                <tr key={key}>
+                  <td>{visual.productionId}</td>
+                  <td>{visual.machineId}</td>
+                  <td>{visual.year}</td>
+                  <td>{visual.machineLocation}</td>
+                  <td>{visual.month}</td>
+                  <td>{visual.day}</td>
+                  <td>{visual.hourOfDay}</td>
+                  <td>{visual.make}</td>
+
+                  <td>
+
+                
+                <button
+                      className="btn my-1 me-2 float-end btn-danger"
+                      onClick={() => handleDelete(visual.productionId)}
+                    > delete </button>
+            
               </td>
             </tr>
+            );
+            })}
           </tbody>
         </table>
-        <Link className="btn btn-secondary mt-3" to="/add">
-          ADD
-        </Link>
+
       </div>
     </>
   );
