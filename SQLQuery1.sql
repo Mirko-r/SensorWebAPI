@@ -14,3 +14,4 @@ CREATE TABLE Productions (
     hourofday INT CHECK (hourofday >= 0 AND hourofday <= 24),
     make int -- Adjust the data type based on the actual nature of 'make'
 );
+
