@@ -66,7 +66,7 @@ export default function Visual() {
               <th className="col">month</th>
               <th className="col">day</th>
               <th className="col">hourofday</th>
-              <th className="col">make</th>
+              <th className="col">summake</th>
 
             </tr>
           </thead>
