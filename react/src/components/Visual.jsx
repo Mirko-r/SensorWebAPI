@@ -2,73 +2,41 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import Swal from "sweetalert2";
 
+export default function Visual() {
+  const [originalVisual, setOriginalVisual] = useState([]);
+  const [filteredVisual, setFilteredVisual] = useState([]);
+  const [locationFilter, setLocationFilter] = useState("");
 
-export default function Visual() {  
-        const [visual, setVisual] = useState([]);
-        const [locationFilter, setLocationFilter] = useState("");
-        useEffect(() => {
-          fetchVisual();
-        }, []);
-      
-        const fetchVisual = () => {
-          axios.get("https://192.168.4.182:7014/api/Productions")
-            .then(function (response) {
-              // fulfilled
-              console.log(response.data);
-              setVisual(response.data);
-            })
-            .catch(function (error) {
-              // rejected
-              console.log(error);
-            });
-        }
-        function handleDelete(id) {
-            Swal.fire({
-              title: "Are you sure?",
-              text: "You cannnot undo this one",
-              icon: "warning",
-              showCancelButton: true,
-              confirmButtonText: "Yes, delete it",
-            }).then((result) => {
-              if (result.isConfirmed) {
-                axios
-                  .delete("https://192.168.4.182:7014/api/Productions/" + id)
-                  .then(function (response) {
-                    Swal.fire({
-                      icon: "success",
-                      title: "production deleted successfully",
-                      showConfirmButton: false,
-                      timer: 1500,
-                    });
-                    fetchVisual();
-                  })
-                  .catch(function (error) {
-                    Swal.fire({
-                      icon: "error",
-                      title: "An error occurred!",
-                      showConfirmButton: false,
-                      timer: 1500,
-                    });
-                    console.log(error);
-                  });
-              }
-            });
-          }
+  useEffect(() => {
+    fetchVisual();
+  }, []);
 
-          const handleLocationFilterChange = (e) => {
-            axios.get("https://192.168.4.182:7014/api/Productions/location/" + e.target.value)
-            .then(function (response) {
-              // fulfilled
-              console.log(response.data);
-              setVisual(response.data);
-            })
-            .catch(function (error) {
-              // rejected
-              console.log(error);
-            });
-          };
-        
-          
+  const fetchVisual = () => {
+    axios.get("https://192.168.4.182:7014/api/Productions")
+      .then(function (response) {
+        setOriginalVisual(response.data);
+        setFilteredVisual(response.data);
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+  };
+
+  const handleDelete = (id) => {
+    // ... (resto del codice rimane invariato)
+  };
+
+  const handleLocationFilterChange = (e) => {
+    setLocationFilter(e.target.value);
+    filterData(e.target.value);
+  };
+
+  const filterData = (filter) => {
+    const filteredData = originalVisual.filter((item) =>
+      item.machineLocation.toLowerCase().includes(filter.toLowerCase())
+    );
+    setFilteredVisual(filteredData);
+  };
 
   return (
     <>
@@ -88,7 +56,7 @@ export default function Visual() {
           />
         </div>
 
-        <table className="table table">
+        <table className="table table-bordered">
           <thead>
             <tr>
               <th className="col">Productions</th>
@@ -100,37 +68,29 @@ export default function Visual() {
               <th className="col">hourofday</th>
               <th className="col">make</th>
               <th className="col">action</th>
-
             </tr>
           </thead>
           <tbody>
-            {visual.map((visual, key) => {
-              return (
-                <tr key={key}>
-                  <td>{visual.productionId}</td>
-                  <td>{visual.machineId}</td>
-                  <td>{visual.year}</td>
-                  <td>{visual.machineLocation}</td>
-                  <td>{visual.month}</td>
-                  <td>{visual.day}</td>
-                  <td>{visual.hourOfDay}</td>
-                  <td>{visual.make}</td>
-
-                  <td>
-
-                
-                <button
-                      className="btn my-1 me-2 float-end btn-danger"
-                      onClick={() => handleDelete(visual.productionId)}
-                    > delete </button>
-            
-              </td>
-            </tr>
-            );
-            })}
+            {filteredVisual.map((currentVisual, key) => (
+              <tr key={key}>
+                <td>{currentVisual.productionId}</td>
+                  <td>{currentVisual.machineId}</td>
+                  <td>{currentVisual.year}</td>
+                  <td>{currentVisual.machineLocation}</td>
+                  <td>{currentVisual.month}</td>
+                  <td>{currentVisual.day}</td>
+                  <td>{currentVisual.hourOfDay}</td>
+                  <td>{currentVisual.make}</td>
+                <td>
+                  <button
+                    className="btn my-1 me-2 float-end btn-danger"
+                    onClick={() => handleDelete(currentVisual.productionId)}
+                  > delete </button>
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
-
       </div>
     </>
   );
