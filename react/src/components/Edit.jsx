@@ -1,11 +1,16 @@
-export default function Edit(){
-    return (<>
-        <h1>edit</h1>
+import { Link } from "react-router-dom";
+export default function Edit() {
+  return (
+    <>
+      <h1>edit</h1>
 
-        <form>
-
-
-        </form>
-        </>
-    )
+      <form>
+        <input type="text" />
+        <br />
+        <Link className="btn btn-secondary mt-3" to="/">
+          CONFIRM
+        </Link>{" "}
+      </form>
+    </>
+  );
 }
