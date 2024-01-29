@@ -42,7 +42,7 @@ export default function Visual() {
     <>
       <div className="container-sm">
         <div>
-          <h1>table test</h1>
+          <h1>PRODUCTIONS</h1>
         </div>
 
         <div className="mb-3">
@@ -67,7 +67,7 @@ export default function Visual() {
               <th className="col">day</th>
               <th className="col">hourofday</th>
               <th className="col">make</th>
-              <th className="col">action</th>
+
             </tr>
           </thead>
           <tbody>
@@ -81,12 +81,7 @@ export default function Visual() {
                   <td>{currentVisual.day}</td>
                   <td>{currentVisual.hourOfDay}</td>
                   <td>{currentVisual.make}</td>
-                <td>
-                  <button
-                    className="btn my-1 me-2 float-end btn-danger"
-                    onClick={() => handleDelete(currentVisual.productionId)}
-                  > delete </button>
-                </td>
+
               </tr>
             ))}
           </tbody>
