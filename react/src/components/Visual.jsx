@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import "./index.css";
+
 
 export default function Visual() {
   const [originalVisual, setOriginalVisual] = useState([]);
@@ -9,32 +11,15 @@ export default function Visual() {
   const [itemsPerPage] = useState(20);
 
   useEffect(() => {
-    if (locationFilter !== "") {
-      filterData(locationFilter);
-    } else {
-      fetchVisual();
-    }
+    fetchVisual();
   }, [currentPage, locationFilter]);
 
   useEffect(() => {
-    const savedLocation = localStorage.getItem("lastLocation");
-    if (savedLocation !== null) {
-      setLocationFilter(savedLocation);
-      // Non chiamare filterData(savedLocation) qui per evitare un doppio fetchVisual
-    } else {
-      // Se savedLocation è null o vuoto, imposta locationFilter a una stringa vuota
-      setLocationFilter("");
-    }
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem("lastLocation", locationFilter);
-  }, [locationFilter]);
-
-
-
+    fetchVisual();
+  });
   const fetchVisual = () => {
-    axios.get("https://192.168.4.182:7014/api/Productions")
+    axios
+      .get("https://192.168.4.182:7014/api/Productions")
       .then(function (response) {
         setOriginalVisual(response.data);
         filterData(locationFilter);
@@ -45,16 +30,24 @@ export default function Visual() {
   };
 
   const handleLocationFilterChange = (e) => {
-    const newLocation = e.target.value;
-    setLocationFilter(newLocation);
+    const updatedLocation = e.target.value.trim();
+    setLocationFilter(updatedLocation);
     setCurrentPage(1);
-    filterData(newLocation);
+
+    if (updatedLocation !== "") {
+      filterData(updatedLocation);
+    } else {
+      fetchVisual();
+    }
   };
 
   const filterData = (filter) => {
     const filteredData = originalVisual.filter((item) =>
-      item.machineLocation.toLowerCase().includes(filter.toLowerCase())
+      (item.machineLocation ? item.machineLocation.toLowerCase() : "").includes(
+        filter.toLowerCase()
+      )
     );
+
     setFilteredVisual(filteredData);
   };
 
@@ -74,11 +67,13 @@ export default function Visual() {
     <>
       <div className="container-sm">
         <div>
-          <h1>PRODUCTIONS</h1>
+          <h1 className="display-1">PRODUCTIONS</h1>
         </div>
-
-        <div className="mb-3">
-          <label htmlFor="locationFilter" className="form-label">Location Filter:</label>
+        <hr className="border border-danger border-3 opacity-50"></hr>
+        <div className="container mb-3">
+          <label htmlFor="locationFilter" className="lead">
+            Filter by location:
+          </label>
           <input
             type="text"
             className="form-control"
@@ -87,8 +82,9 @@ export default function Visual() {
             onChange={(e) => handleLocationFilterChange(e)}
           />
         </div>
+        <hr className="border border-danger border-1 opacity-25"></hr>
 
-        <table className="table table-bordered">
+        <table className="table table-hover item-center lead">
           <thead>
             <tr>
               <th className="col">Productions</th>
@@ -117,14 +113,40 @@ export default function Visual() {
           </tbody>
         </table>
 
-        <div className="pagination">
-          <button className="btn btn-secondary mt-3" onClick={() => handlePageChange(1)}>First</button>
-          <button className="btn btn-secondary mt-3" onClick={() => handlePageChange(currentPage - 1)}>Previous</button>
-          <span>Page {currentPage} of {totalPages}</span>
-          <button className="btn btn-secondary mt-3" onClick={() => handlePageChange(currentPage + 1)}>Next</button>
-          <button className="btn btn-secondary mt-3" onClick={() => handlePageChange(totalPages)}>Last</button>
+        <div className="pagination  justify-content-center mt-3">
+          <button
+            className="btn btn-secondary mt-3"
+            onClick={() => handlePageChange(1)}
+          >
+            {"<<"}
+          </button>
+          <button
+            className="btn btn-secondary mt-3 mx-2"
+            onClick={() => handlePageChange(currentPage - 1)}
+          >
+            {"<"}
+          </button>
+
+          <div className="container mb-3">
+            <label className="lead">
+              Page {currentPage} of {totalPages}
+            </label>
+          </div>
+          <button
+            className="btn btn-secondary mt-3 mx-2"
+            onClick={() => handlePageChange(currentPage + 1)}
+          >
+            {">"}
+          </button>
+          <button
+            className="btn btn-secondary mt-3 "
+            onClick={() => handlePageChange(totalPages)}
+          >
+            {">>"}
+          </button>
         </div>
       </div>
+      
     </>
   );
 }
