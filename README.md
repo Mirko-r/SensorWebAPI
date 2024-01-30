@@ -4,7 +4,7 @@
 
 ### 1.1 Scenario
 
-![scenario](".Docu/Scrh/case_study.png")
+![scenario](./Docu/Scrh/case_study.png)
 
 ### 1.2 Tech Stack
 
@@ -200,24 +200,24 @@ RabbitMq creerà un'altro Thread  in ascolto di messaggi da una coda specificata
 
 ### Successful Login
 
-![loginyes]("./Docu/Scrh/Login_Example.png")
+![loginyes](./Docu/Scrh/Login_Example.png)
 
 ### Chiamata ad un Web API Method senza autorizzazione
 
-![noauth]("./Docu/Scrh/Unhautorized_Example.png")
+![noauth](./Docu/Scrh/Unhautorized_Example.png)
 
 ### HttpGet All Productions
 
-![getall]("./Docu/Scrh/Postman_get_all.png")
+![getall](./Docu/Scrh/Postman_get_all.png)
 
 ### HttpGet by MAchineID
 
-![getByMcId]("./Docu/Scrh/Postman_get_by_MachineID.png")
+![getByMcId](./Docu/Scrh/Postman_get_by_MachineID.png)
 
 ### HttpPost a Production
 
-![post]("./Docu/Scrh/Postman_post_productions.png")
+![post](./Docu/Scrh/Postman_post_productions.png)
 
 ### HttpDelete all productions with a MachineId
 
-![deleteAllWithMachineId]("./Docu/Scrh/Postman_delete_from_MachineId.png")
+![deleteAllWithMachineId](./Docu/Scrh/Postman_delete_from_MachineId.png)
