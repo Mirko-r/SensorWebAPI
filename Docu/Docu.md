@@ -4,7 +4,7 @@
 
 ### 1.1 Scenario
 
-Consideriamo un'azienda fittizia distribuita su territorio nazionale che produce componenti elettronici. La produzione è gestita da macchine dotate di sensori, che inviano informazioni a un broker di messaggi. Le informazioni vengono poi consumate da un'applicazione .NET che le memorizza in un database. I dati di produzione sono esposti attraverso un servizio web ASP.NET Core, con autenticazione JWT. Infine, una dashboard SPA React consente di visualizzare i dati in tempo reale e interagire con essi.
+![scenario]("./Scrh/case_study.png")
 
 ### 1.2 Tech Stack
 
@@ -42,172 +42,182 @@ Un JSON Web Token (JWT) è composto da tre parti: Header, Payload e Signature (F
 - **Payload:** contiene le informazioni utili del token. Le informazioni sono chiamate Claims e possono includere dati sull'utente, autorizzazioni, scadenza del token, roles, audience e issuer.
 - **Signature:** è il risultato della firma digitale dell'Header e del Payload combinati con una chiave segreta.
 
-## 2. Implementazione di JWT
+## 2\. SQL
 
-### Configurazione
+```SQL
+-- Creating the Machines table
+CREATE TABLE Machines (
+    machineid varchar(50) PRIMARY KEY,
+    location VARCHAR(255) NOT NULL
+);
 
-```csharp
-[HttpGet]
-public IEnumerable<object> GetAll()
-{
-    return _context.Productions.Include(p => p.Machine) 
-    // Include la navigazione alla macchina associata
-    .Select(p => new
-    {
-        ProductionId = p.ProductionId,
-        MachineId = p.MachineId,
-        year = p.year,
-        month = p.month,
-        day = p.day,
-        hourOfDay = p.hourOfDay,
-        make = p.make,
-        MachineLocation = p.Machine.location
-    }).ToList();
-}
+-- Creating the Productions table
+CREATE TABLE Productions (
+    productionid INT PRIMARY KEY,
+    machineid varchar(50) FOREIGN KEY REFERENCES Machines(machineid),
+    year INT,
+    month INT,
+    day INT,
+    hourofday INT CHECK (hourofday >= 0 AND hourofday <= 24),
+    make int
+);
+
+create table Users(
+    UserId bigint identity,
+    Username varchar(50),
+    Password varchar(500),
+    Role varchar(500),  
+    HashToVerify varchar(100),
+    SaltToVerify varchar(100)
+)
+
+insert into Machines (machineid, location) 
+values
+('LSD23431OP', 'Milan'),
+('LLOPRER13P', 'Rome')
 ```
 
-#### HttpGet All
+## 3\. Implementazione di JWT
+
+### Configurazione in Program.cs
 
 ```csharp
-[HttpGet]
-public IEnumerable<object> GetAll()
-{
-    return _context.Productions.Include(p => p.Machine) 
-    // Include la navigazione alla macchina associata
-    .Select(p => new
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme) // JWT auth
+    .AddJwtBearer(options =>
     {
-        ProductionId = p.ProductionId,
-        MachineId = p.MachineId,
-        year = p.year,
-        month = p.month,
-        day = p.day,
-        hourOfDay = p.hourOfDay,
-        make = p.make,
-        MachineLocation = p.Machine.location
-    }).ToList();
-}
-```
-
-Questo END-Point viene usato da React  per caricare tutte le produzioni presenti nel database.
-Il metodo utilizza Entity Framework Core per accedere al database e recuperare le informazioni sulla produzione. Include anche la navigazione alla macchina associata per ottenere il dettaglio sulla sua posizione. I dati vengono quindi proiettati in un nuovo oggetto anonimo che include solo le informazioni rilevanti.
-
-##### Esempio di funzionamente con PostMan
-
-![img]("./Scrh/Postman_get_all.png")
-
-#### HttpGet location
-
-```csharp
-[HttpGet("/filter/{location}")]
-public IActionResult GetByMachineLocation(string location)
-{
-    Machine? machine = _context.Machines.Where(m => m.location.Contains(location))
-        .Include(m => m.Productions).FirstOrDefault();
-    var result = new
-    {
-        Machine = new
+        options.TokenValidationParameters = new TokenValidationParameters
         {
-            Location = machine.location,
-        },
-        Productions = machine.Productions
+            ValidateIssuer = true, // chi ha rilasciato il token
+            ValidateAudience = true, // portatore del token
+            ValidateLifetime = true, // scadenza del token
+            ValidateIssuerSigningKey = true, // validare chiave che ha firmato il token
+            ValidIssuer = builder.Configuration["Jwt:Issuer"], // chi è l'issuer?
+            ValidAudience = builder.Configuration["Jwt:Audience"], // chi è l'audience
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
+                builder.Configuration["Jwt:Key"])
+            ) //chiave per firmare il token
+        };
+    });
+```
+
+### Processo di autenticazione nel Controller
+
+#### 1\. Post del login
+
+```csharp
+ [HttpPost("login")]
+ [AllowAnonymous] // non c'è bisogno di presentare un token
+ [ProducesResponseType(StatusCodes.Status200OK)]
+ [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+ public IActionResult Login([FromBody] UserModel login)
+ {
+     Console.WriteLine("ss");
+     IActionResult response = Unauthorized(); // 401
+     var user = AuthenticateUser(login);
+     if (user != null)
+     {
+         Console.WriteLine("user not null");
+         string tokenString = GenerateJSONWebToken(user);
+         response = Ok(new { token = tokenString });
+     }
+     return response;
+ } 
+```
+
+#### 2\. AuthenticatUser
+
+```csharp
+ private User AuthenticateUser(UserModel login)
+{
+    try
+    {
+        User user = _context.Users.FirstOrDefault(
+            u => u.Username.Equals(login.Username)
+            );
+        if (user.VerifyPassword(login.Password, user.HashToVerify, user.SaltToVerify))
+        {
+            return user;
+        }
+        else
+        {
+            throw new Exception("Password not verified");
+        }
+    }
+    catch (Exception ex)
+    {
+        // Aggiungi la gestione dell'eccezione, ad esempio il logging
+        Console.WriteLine($"Errore durante l'autenticazione: {ex.Message}");
+        return null;
+    }
+} 
+```
+
+Questo metodo controlla nel se l'utente esiste nel DB e verifica la password utilizzando una funzione di hash.
+
+#### 3\. GenerateJSONWebTOken
+
+```csharp
+ private string GenerateJSONWebToken(User login)
+{
+    var securitykey = new SymmetricSecurityKey(
+        Encoding.UTF8.GetBytes(_config["Jwt:Key"])
+        );
+
+    var claims = new[] {
+        new Claim(JwtRegisteredClaimNames.Sub, login.Username),
+        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()), // uid univoco del claim 
+        new Claim("role", login.Role.ToString())
     };
 
-    return Ok(result);
+    var token = new JwtSecurityToken(
+        _config["Jwt:Issuer"],
+        _config["Jwt:Audience"],
+        claims,
+        expires: DateTime.Now.AddMinutes(120),
+        signingCredentials: new SigningCredentials(
+            securitykey, SecurityAlgorithms.HmacSha256)
+        );
+
+    return new JwtSecurityTokenHandler().WriteToken(token);
 }
 ```
 
-#### HttpGet MachineID
+Genera il JWT per l'utente autenticato.
 
-```csharp
-[HttpGet("{machineId}")]
-public ActionResult<IEnumerable<object>> GetByMachineId(string machineId)
-{
-    // Trova la macchina nel contesto del database in base all'ID fornito
-    var machineData = _context.Machines
-        .Where(m => m.MachineId == machineId)
-        // Per ogni macchina trovata, seleziona le produzioni associate 
-        //trasformate in un nuovo oggetto anonimo
-        .Select(m => m.Productions.Select(p => new
-        {
-            p.ProductionId,
-            p.MachineId,
-            p.year,
-            p.month,
-            p.day,
-            p.hourOfDay,
-            p.make,
-        })).ToList();
+## 4\. Consumatore
 
-    if (machineData == null)
-    {
-        return NotFound();
-    }
+### Struttura del codice
 
-    return Ok(machineData);
-}
-```
+Il codice è diviso in due principali sezioni: la configurazione e l'utilizzo di RabbitMQ e l'utilizzo di ADO\.NET per l'accesso e la manipolazione dei dati nel database SQL Server. La gestione del multithreading è implementata attraverso l'uso di Thread.Sleep per simulare l'attesa di un'ora prima dell'elaborazione dei dati.
+RabbitMq creerà un'altro Thread  in ascolto di messaggi da una coda specificata.
 
-##### Esempio di funzionamente con PostMan
+## 5\. ADO\.Net / Entity Framework
 
-![img]("./Scrh/Postman_get_by_MachineID.png")
+- **ADO\.Net:** fornisce accesso diretto al DB, utilizzato nel Consumatore per avere un controllo più diretto sulla manipolazione dei dati e logica personalizzata nelle query
+- **Entity Framework:** è un ORM (Object-Relational Mapping) che semplifica la gestione dei dati mediante l'astrazione dei dati del database in oggetti nel codice, utilizzato nella web API per semplificare l'accesso ai dati.
 
-#### HttpDelete MachineID
+## 6\. Esempi di funzionamento web API con Postman
 
-```csharp
-[HttpDelete("{MachineId}")]
-public IActionResult DeletebyId(string MachineId)
-{
-    Machine machine = _context.Machines.Find(MachineId);
+### Successful Login
 
-    if (machine == null)
-    {
-        return NotFound();
-    }
+![loginyes]("./Scrh/Login_Example.png")
 
-    List<Production> productionsToDelete = _context.Productions
-        .Where(p => p.MachineId == MachineId).ToList();
+### Chiamata ad un Web API Method senza autorizzazione
 
-    _context.Productions.RemoveRange(productionsToDelete);
-    _context.SaveChanges();
+![noauth]("./Scrh/Unhautorized_Example.png")
 
-    return Ok(productionsToDelete);
-}
-```
+### HttpGet All Productions
 
-##### Esempio di funzionamente con PostMan
+![getall]("./Scrh/Postman_get_all.png")
 
-![img]("./Scrh/Postman_delete_from_MachineId.png")
+### HttpGet by MAchineID
 
-#### HttpPost
+![getByMcId]("./Scrh/Postman_get_by_MachineID.png")
 
-```csharp
- [HttpPost] // post a production fromBody
- public async Task<IActionResult> AddProd([FromBody] ProductionBindingTarget prod)
- {
-         if (prod != null)
-         {
-             var production = new Production
-             {
-                 MachineId = prod.MachineId,
-                 year = prod.Year,
-                 month = prod.Month,
-                 day = prod.Day,
-                 hourOfDay = prod.HourOfDay,
-                 make = prod.Make
-             };
+### HttpPost a Production
 
-             await _context.Productions.AddAsync(production);
-             await _context.SaveChangesAsync();
+![post]("./Scrh/Postman_post_productions.png")
 
-             return Ok(production);
-         }
-         else
-         {
-             return BadRequest("Dati della produzione non validi.");
-         }
- }
-```
+### HttpDelete all productions with a MachineId
 
-##### Esempio di funzionamente con PostMan
-
-![img]("./Scrh/Postman_post_productions.png")
+![deleteAllWithMachineId]("./Scrh/Postman_delete_from_MachineId.png")

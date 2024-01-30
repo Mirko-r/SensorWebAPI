@@ -362,7 +362,7 @@ code {
 <h1 id="esercitazione-finale">Esercitazione finale</h1>
 <h2 id="1-introduzione">1. Introduzione</h2>
 <h3 id="11-scenario">1.1 Scenario</h3>
-<p>Consideriamo un'azienda fittizia distribuita su territorio nazionale che produce componenti elettronici. La produzione è gestita da macchine dotate di sensori, che inviano informazioni a un broker di messaggi. Le informazioni vengono poi consumate da un'applicazione .NET che le memorizza in un database. I dati di produzione sono esposti attraverso un servizio web ASP.NET Core, con autenticazione JWT. Infine, una dashboard SPA React consente di visualizzare i dati in tempo reale e interagire con essi.</p>
+<p><img src="./Scrh/case_study.png" alt="scenario"></p>
 <h3 id="12-tech-stack">1.2 Tech Stack</h3>
 <ul>
 <li><strong>.NET:</strong> Utilizzato per lo sviluppo delle applicazioni console e del servizio web.</li>
@@ -395,130 +395,151 @@ code {
 <li><strong>Payload:</strong> contiene le informazioni utili del token. Le informazioni sono chiamate Claims e possono includere dati sull'utente, autorizzazioni, scadenza del token, roles, audience e issuer.</li>
 <li><strong>Signature:</strong> è il risultato della firma digitale dell'Header e del Payload combinati con una chiave segreta.</li>
 </ul>
-<h2 id="2-web-app">2. Web App</h2>
-<h3 id="21-productionscontroller">2.1 ProductionsController</h3>
-<h4 id="httpget-all">HttpGet All</h4>
-<pre class="hljs"><code><div>[<span class="hljs-meta">HttpGet</span>]
-<span class="hljs-function"><span class="hljs-keyword">public</span> IEnumerable&lt;<span class="hljs-keyword">object</span>&gt; <span class="hljs-title">GetAll</span>(<span class="hljs-params"></span>)</span>
-{
-    <span class="hljs-keyword">return</span> _context.Productions.Include(p =&gt; p.Machine) 
-    <span class="hljs-comment">// Include la navigazione alla macchina associata</span>
-    .Select(p =&gt; <span class="hljs-keyword">new</span>
-    {
-        ProductionId = p.ProductionId,
-        MachineId = p.MachineId,
-        year = p.year,
-        month = p.month,
-        day = p.day,
-        hourOfDay = p.hourOfDay,
-        make = p.make,
-        MachineLocation = p.Machine.location
-    }).ToList();
-}
+<h2 id="2-sql">2. SQL</h2>
+<pre class="hljs"><code><div><span class="hljs-comment">-- Creating the Machines table</span>
+<span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> Machines (
+    machineid <span class="hljs-built_in">varchar</span>(<span class="hljs-number">50</span>) PRIMARY <span class="hljs-keyword">KEY</span>,
+    location <span class="hljs-built_in">VARCHAR</span>(<span class="hljs-number">255</span>) <span class="hljs-keyword">NOT</span> <span class="hljs-literal">NULL</span>
+);
+
+<span class="hljs-comment">-- Creating the Productions table</span>
+<span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> Productions (
+    productionid <span class="hljs-built_in">INT</span> PRIMARY <span class="hljs-keyword">KEY</span>,
+    machineid <span class="hljs-built_in">varchar</span>(<span class="hljs-number">50</span>) <span class="hljs-keyword">FOREIGN</span> <span class="hljs-keyword">KEY</span> <span class="hljs-keyword">REFERENCES</span> Machines(machineid),
+    <span class="hljs-keyword">year</span> <span class="hljs-built_in">INT</span>,
+    <span class="hljs-keyword">month</span> <span class="hljs-built_in">INT</span>,
+    <span class="hljs-keyword">day</span> <span class="hljs-built_in">INT</span>,
+    hourofday <span class="hljs-built_in">INT</span> <span class="hljs-keyword">CHECK</span> (hourofday &gt;= <span class="hljs-number">0</span> <span class="hljs-keyword">AND</span> hourofday &lt;= <span class="hljs-number">24</span>),
+    make <span class="hljs-built_in">int</span>
+);
+
+<span class="hljs-keyword">create</span> <span class="hljs-keyword">table</span> <span class="hljs-keyword">Users</span>(
+    UserId <span class="hljs-built_in">bigint</span> <span class="hljs-keyword">identity</span>,
+    Username <span class="hljs-built_in">varchar</span>(<span class="hljs-number">50</span>),
+    <span class="hljs-keyword">Password</span> <span class="hljs-built_in">varchar</span>(<span class="hljs-number">500</span>),
+    <span class="hljs-keyword">Role</span> <span class="hljs-built_in">varchar</span>(<span class="hljs-number">500</span>),  
+    HashToVerify <span class="hljs-built_in">varchar</span>(<span class="hljs-number">100</span>),
+    SaltToVerify <span class="hljs-built_in">varchar</span>(<span class="hljs-number">100</span>)
+)
+
+<span class="hljs-keyword">insert</span> <span class="hljs-keyword">into</span> Machines (machineid, location) 
+<span class="hljs-keyword">values</span>
+(<span class="hljs-string">'LSD23431OP'</span>, <span class="hljs-string">'Milan'</span>),
+(<span class="hljs-string">'LLOPRER13P'</span>, <span class="hljs-string">'Rome'</span>)
 </div></code></pre>
-<p>Questo END-Point viene usato da React  per caricare tutte le produzioni presenti nel database.
-Il metodo utilizza Entity Framework Core per accedere al database e recuperare le informazioni sulla produzione. Include anche la navigazione alla macchina associata per ottenere il dettaglio sulla sua posizione. I dati vengono quindi proiettati in un nuovo oggetto anonimo che include solo le informazioni rilevanti.</p>
-<h5 id="esempio-di-funzionamente-con-postman">Esempio di funzionamente con PostMan</h5>
-<p><img src="./Scrh/Postman_get_all.png" alt="img"></p>
-<h4 id="httpget-location">HttpGet location</h4>
-<pre class="hljs"><code><div>[<span class="hljs-meta">HttpGet(<span class="hljs-meta-string">"/filter/{location}"</span>)</span>]
-<span class="hljs-function"><span class="hljs-keyword">public</span> IActionResult <span class="hljs-title">GetByMachineLocation</span>(<span class="hljs-params"><span class="hljs-keyword">string</span> location</span>)</span>
-{
-    Machine? machine = _context.Machines.Where(m =&gt; m.location.Contains(location))
-        .Include(m =&gt; m.Productions).FirstOrDefault();
-    <span class="hljs-keyword">var</span> result = <span class="hljs-keyword">new</span>
+<h2 id="3-implementazione-di-jwt">3. Implementazione di JWT</h2>
+<h3 id="configurazione-in-programcs">Configurazione in Program.cs</h3>
+<pre class="hljs"><code><div>builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme) <span class="hljs-comment">// JWT auth</span>
+    .AddJwtBearer(options =&gt;
     {
-        Machine = <span class="hljs-keyword">new</span>
+        options.TokenValidationParameters = <span class="hljs-keyword">new</span> TokenValidationParameters
         {
-            Location = machine.location,
-        },
-        Productions = machine.Productions
+            ValidateIssuer = <span class="hljs-literal">true</span>, <span class="hljs-comment">// chi ha rilasciato il token</span>
+            ValidateAudience = <span class="hljs-literal">true</span>, <span class="hljs-comment">// portatore del token</span>
+            ValidateLifetime = <span class="hljs-literal">true</span>, <span class="hljs-comment">// scadenza del token</span>
+            ValidateIssuerSigningKey = <span class="hljs-literal">true</span>, <span class="hljs-comment">// validare chiave che ha firmato il token</span>
+            ValidIssuer = builder.Configuration[<span class="hljs-string">"Jwt:Issuer"</span>], <span class="hljs-comment">// chi è l'issuer?</span>
+            ValidAudience = builder.Configuration[<span class="hljs-string">"Jwt:Audience"</span>], <span class="hljs-comment">// chi è l'audience</span>
+            IssuerSigningKey = <span class="hljs-keyword">new</span> SymmetricSecurityKey(Encoding.UTF8.GetBytes(
+                builder.Configuration[<span class="hljs-string">"Jwt:Key"</span>])
+            ) <span class="hljs-comment">//chiave per firmare il token</span>
+        };
+    });
+</div></code></pre>
+<h3 id="processo-di-autenticazione-nel-controller">Processo di autenticazione nel Controller</h3>
+<h4 id="1-post-del-login">1. Post del login</h4>
+<pre class="hljs"><code><div> [<span class="hljs-meta">HttpPost(<span class="hljs-meta-string">"login"</span>)</span>]
+ [<span class="hljs-meta">AllowAnonymous</span>] <span class="hljs-comment">// non c'è bisogno di presentare un token</span>
+ [<span class="hljs-meta">ProducesResponseType(StatusCodes.Status200OK)</span>]
+ [<span class="hljs-meta">ProducesResponseType(StatusCodes.Status401Unauthorized)</span>]
+ <span class="hljs-function"><span class="hljs-keyword">public</span> IActionResult <span class="hljs-title">Login</span>(<span class="hljs-params">[FromBody] UserModel login</span>)</span>
+ {
+     Console.WriteLine(<span class="hljs-string">"ss"</span>);
+     IActionResult response = Unauthorized(); <span class="hljs-comment">// 401</span>
+     <span class="hljs-keyword">var</span> user = AuthenticateUser(login);
+     <span class="hljs-keyword">if</span> (user != <span class="hljs-literal">null</span>)
+     {
+         Console.WriteLine(<span class="hljs-string">"user not null"</span>);
+         <span class="hljs-keyword">string</span> tokenString = GenerateJSONWebToken(user);
+         response = Ok(<span class="hljs-keyword">new</span> { token = tokenString });
+     }
+     <span class="hljs-keyword">return</span> response;
+ } 
+</div></code></pre>
+<h4 id="2-authenticatuser">2. AuthenticatUser</h4>
+<pre class="hljs"><code><div> <span class="hljs-function"><span class="hljs-keyword">private</span> User <span class="hljs-title">AuthenticateUser</span>(<span class="hljs-params">UserModel login</span>)</span>
+{
+    <span class="hljs-keyword">try</span>
+    {
+        User user = _context.Users.FirstOrDefault(
+            u =&gt; u.Username.Equals(login.Username)
+            );
+        <span class="hljs-keyword">if</span> (user.VerifyPassword(login.Password, user.HashToVerify, user.SaltToVerify))
+        {
+            <span class="hljs-keyword">return</span> user;
+        }
+        <span class="hljs-keyword">else</span>
+        {
+            <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> Exception(<span class="hljs-string">"Password not verified"</span>);
+        }
+    }
+    <span class="hljs-keyword">catch</span> (Exception ex)
+    {
+        <span class="hljs-comment">// Aggiungi la gestione dell'eccezione, ad esempio il logging</span>
+        Console.WriteLine(<span class="hljs-string">$"Errore durante l'autenticazione: <span class="hljs-subst">{ex.Message}</span>"</span>);
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;
+    }
+} 
+</div></code></pre>
+<p>Questo metodo controlla nel se l'utente esiste nel DB e verifica la password utilizzando una funzione di hash.</p>
+<h4 id="3-generatejsonwebtoken">3. GenerateJSONWebTOken</h4>
+<pre class="hljs"><code><div> <span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">string</span> <span class="hljs-title">GenerateJSONWebToken</span>(<span class="hljs-params">User login</span>)</span>
+{
+    <span class="hljs-keyword">var</span> securitykey = <span class="hljs-keyword">new</span> SymmetricSecurityKey(
+        Encoding.UTF8.GetBytes(_config[<span class="hljs-string">"Jwt:Key"</span>])
+        );
+
+    <span class="hljs-keyword">var</span> claims = <span class="hljs-keyword">new</span>[] {
+        <span class="hljs-keyword">new</span> Claim(JwtRegisteredClaimNames.Sub, login.Username),
+        <span class="hljs-keyword">new</span> Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()), <span class="hljs-comment">// uid univoco del claim </span>
+        <span class="hljs-keyword">new</span> Claim(<span class="hljs-string">"role"</span>, login.Role.ToString())
     };
 
-    <span class="hljs-keyword">return</span> Ok(result);
+    <span class="hljs-keyword">var</span> token = <span class="hljs-keyword">new</span> JwtSecurityToken(
+        _config[<span class="hljs-string">"Jwt:Issuer"</span>],
+        _config[<span class="hljs-string">"Jwt:Audience"</span>],
+        claims,
+        expires: DateTime.Now.AddMinutes(<span class="hljs-number">120</span>),
+        signingCredentials: <span class="hljs-keyword">new</span> SigningCredentials(
+            securitykey, SecurityAlgorithms.HmacSha256)
+        );
+
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> JwtSecurityTokenHandler().WriteToken(token);
 }
 </div></code></pre>
-<h4 id="httpget-machineid">HttpGet MachineID</h4>
-<pre class="hljs"><code><div>[<span class="hljs-meta">HttpGet(<span class="hljs-meta-string">"{machineId}"</span>)</span>]
-<span class="hljs-keyword">public</span> ActionResult&lt;IEnumerable&lt;<span class="hljs-keyword">object</span>&gt;&gt; GetByMachineId(<span class="hljs-keyword">string</span> machineId)
-{
-    <span class="hljs-comment">// Trova la macchina nel contesto del database in base all'ID fornito</span>
-    <span class="hljs-keyword">var</span> machineData = _context.Machines
-        .Where(m =&gt; m.MachineId == machineId)
-        <span class="hljs-comment">// Per ogni macchina trovata, seleziona le produzioni associate </span>
-        <span class="hljs-comment">//trasformate in un nuovo oggetto anonimo</span>
-        .Select(m =&gt; m.Productions.Select(p =&gt; <span class="hljs-keyword">new</span>
-        {
-            p.ProductionId,
-            p.MachineId,
-            p.year,
-            p.month,
-            p.day,
-            p.hourOfDay,
-            p.make,
-        })).ToList();
-
-    <span class="hljs-keyword">if</span> (machineData == <span class="hljs-literal">null</span>)
-    {
-        <span class="hljs-keyword">return</span> NotFound();
-    }
-
-    <span class="hljs-keyword">return</span> Ok(machineData);
-}
-</div></code></pre>
-<h5 id="esempio-di-funzionamente-con-postman">Esempio di funzionamente con PostMan</h5>
-<p><img src="./Scrh/Postman_get_by_MachineID.png" alt="img"></p>
-<h4 id="httpdelete-machineid">HttpDelete MachineID</h4>
-<pre class="hljs"><code><div>[<span class="hljs-meta">HttpDelete(<span class="hljs-meta-string">"{MachineId}"</span>)</span>]
-<span class="hljs-function"><span class="hljs-keyword">public</span> IActionResult <span class="hljs-title">DeletebyId</span>(<span class="hljs-params"><span class="hljs-keyword">string</span> MachineId</span>)</span>
-{
-    Machine machine = _context.Machines.Find(MachineId);
-
-    <span class="hljs-keyword">if</span> (machine == <span class="hljs-literal">null</span>)
-    {
-        <span class="hljs-keyword">return</span> NotFound();
-    }
-
-    List&lt;Production&gt; productionsToDelete = _context.Productions
-        .Where(p =&gt; p.MachineId == MachineId).ToList();
-
-    _context.Productions.RemoveRange(productionsToDelete);
-    _context.SaveChanges();
-
-    <span class="hljs-keyword">return</span> Ok(productionsToDelete);
-}
-</div></code></pre>
-<h5 id="esempio-di-funzionamente-con-postman">Esempio di funzionamente con PostMan</h5>
-<p><img src="./Scrh/Postman_delete_from_MachineId.png" alt="img"></p>
-<h4 id="httppost">HttpPost</h4>
-<pre class="hljs"><code><div> [<span class="hljs-meta">HttpPost</span>] <span class="hljs-comment">// post a production fromBody</span>
- <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">async</span> Task&lt;IActionResult&gt; <span class="hljs-title">AddProd</span>(<span class="hljs-params">[FromBody] ProductionBindingTarget prod</span>)</span>
- {
-         <span class="hljs-keyword">if</span> (prod != <span class="hljs-literal">null</span>)
-         {
-             <span class="hljs-keyword">var</span> production = <span class="hljs-keyword">new</span> Production
-             {
-                 MachineId = prod.MachineId,
-                 year = prod.Year,
-                 month = prod.Month,
-                 day = prod.Day,
-                 hourOfDay = prod.HourOfDay,
-                 make = prod.Make
-             };
-
-             <span class="hljs-keyword">await</span> _context.Productions.AddAsync(production);
-             <span class="hljs-keyword">await</span> _context.SaveChangesAsync();
-
-             <span class="hljs-keyword">return</span> Ok(production);
-         }
-         <span class="hljs-keyword">else</span>
-         {
-             <span class="hljs-keyword">return</span> BadRequest(<span class="hljs-string">"Dati della produzione non validi."</span>);
-         }
- }
-</div></code></pre>
-<h5 id="esempio-di-funzionamente-con-postman">Esempio di funzionamente con PostMan</h5>
-<p><img src="./Scrh/Postman_post_productions.png" alt="img"></p>
+<p>Genera il JWT per l'utente autenticato.</p>
+<h2 id="4-consumatore">4. Consumatore</h2>
+<h3 id="struttura-del-codice">Struttura del codice</h3>
+<p>Il codice è diviso in due principali sezioni: la configurazione e l'utilizzo di RabbitMQ e l'utilizzo di ADO.NET per l'accesso e la manipolazione dei dati nel database SQL Server. La gestione del multithreading è implementata attraverso l'uso di Thread.Sleep per simulare l'attesa di un'ora prima dell'elaborazione dei dati.
+RabbitMq creerà un'altro Thread  in ascolto di messaggi da una coda specificata.</p>
+<h2 id="5-adonet--entity-framework">5. ADO.Net / Entity Framework</h2>
+<ul>
+<li><strong>ADO.Net:</strong> fornisce accesso diretto al DB, utilizzato nel Consumatore per avere un controllo più diretto sulla manipolazione dei dati e logica personalizzata nelle query</li>
+<li><strong>Entity Framework:</strong> è un ORM (Object-Relational Mapping) che semplifica la gestione dei dati mediante l'astrazione dei dati del database in oggetti nel codice, utilizzato nella web API per semplificare l'accesso ai dati.</li>
+</ul>
+<h2 id="6-esempi-di-funzionamento-web-api-con-postman">6. Esempi di funzionamento web API con Postman</h2>
+<h3 id="successful-login">Successful Login</h3>
+<p><img src="./Scrh/Login_Example.png" alt="loginyes"></p>
+<h3 id="chiamata-ad-un-web-api-method-senza-autorizzazione">Chiamata ad un Web API Method senza autorizzazione</h3>
+<p><img src="./Scrh/Unhautorized_Example.png" alt="noauth"></p>
+<h3 id="httpget-all-productions">HttpGet All Productions</h3>
+<p><img src="./Scrh/Postman_get_all.png" alt="getall"></p>
+<h3 id="httpget-by-machineid">HttpGet by MAchineID</h3>
+<p><img src="./Scrh/Postman_get_by_MachineID.png" alt="getByMcId"></p>
+<h3 id="httppost-a-production">HttpPost a Production</h3>
+<p><img src="./Scrh/Postman_post_productions.png" alt="post"></p>
+<h3 id="httpdelete-all-productions-with-a-machineid">HttpDelete all productions with a MachineId</h3>
+<p><img src="./Scrh/Postman_delete_from_MachineId.png" alt="deleteAllWithMachineId"></p>
 
 </body>
 </html>
