@@ -222,7 +222,6 @@ RabbitMq creerà un'altro Thread  in ascolto di messaggi da una coda specificata
 
 ![deleteAllWithMachineId]("./Scrh/Postman_delete_from_MachineId.png")
 
-
 ## 7\. React
 
 ### 1\. Librerie utilizzate

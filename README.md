@@ -221,3 +221,141 @@ RabbitMq creerà un'altro Thread  in ascolto di messaggi da una coda specificata
 ### HttpDelete all productions with a MachineId
 
 ![deleteAllWithMachineId](./Docu/Scrh/Postman_delete_from_MachineId.png)
+
+## 7\. React
+
+### 1\. Librerie utilizzate
+
+- **Axios:**  per le chiamate HTTP al server, permette di fare richieste API.
+-  **React Router:** per la navigazione tra le pagine dell'app
+- **Bootstrap:** per l'utilizzo del layout e delle componenti grafiche
+- **sweetalert2:**  per mostrare messaggi di conferma o errore alle azioni eseguite dall'utente
+
+### 2\. Componenti principali
+
+#### App.js
+
+La principale componente della nostra applicazione è `App`, che contiene il routing e le diverse pagine dell'applicazione. 
+
+#### Login.jsx
+
+Componente  che gestisce il login dell'utente. Invia una richiesta POST all'API per autenticare l'utente. Se l'autenticazione è andata a buon fine fornisce all'utente un token per andare avanti.
+
+#### Visual.jsx
+
+Componetne  che gestisce il rendering della home page
+
+La visual è composta da due sezioni principali:
+
+- La sezione inferiore che mostra i prodotti disponibili per la macchina selezionata.
+
+- Il caricamento dei dati iniziali attraverso una chiamata API.
+
+
+## 3\. Codice 
+
+####  Recupero dati`Visual.jsx`
+```js
+const fetchVisual = () => {
+  // Effettua una richiesta GET all'endpoint specificato dell'API
+  axios
+    .get("https://192.168.4.182:7014/api/Productions")
+    .then(function (response) {
+      // Se la richiesta ha successo, imposta lo stato originalVisual con i dati ricevuti
+      setOriginalVisual(response.data);
+
+      // Chiama la funzione filterData per filtrare inizialmente i dati in base a locationFilter
+      filterData(locationFilter);
+    })
+    .catch(function (error) {
+      // Registra eventuali errori che si verificano durante la richiesta API
+      console.log(error);
+    });
+};
+```
+
+
+
+####  Filtering data`Visual.jsx`
+```js
+
+const filterData = (filter) => {
+  // Filtra i dati in base al filtro specificato (locationFilter)
+  const filteredData = originalVisual.filter((item) =>
+    // Confronta il valore di machineLocation (trasformato in minuscolo) con il filtro
+    (item.machineLocation ? item.machineLocation.toLowerCase() : "").includes(
+      filter.toLowerCase()
+    )
+  );
+  // Imposta lo stato filteredVisual con i dati filtrati
+  setFilteredVisual(filteredData);
+};
+```
+
+#### Visualizzazione dati `Visual.jsx`
+```html
+ <table className="table table-hover item-center lead">
+          <thead>
+            <tr>
+              <th className="col">Productions</th>
+              <th className="col">Sensor</th>
+              <th className="col">year</th>
+              <th className="col">location</th>
+              <th className="col">month</th>
+              <th className="col">day</th>
+              <th className="col">hourofday</th>
+              <th className="col">summake</th>
+            </tr>
+          </thead>
+          <tbody>
+            {slicedData.map((currentVisual, key) => (
+              <tr key={key}>
+                <td>{currentVisual.productionId}</td>
+                <td>{currentVisual.machineId}</td>
+                <td>{currentVisual.year}</td>
+                <td>{currentVisual.machineLocation}</td>
+                <td>{currentVisual.month}</td>
+                <td>{currentVisual.day}</td>
+                <td>{currentVisual.hourOfDay}</td>
+                <td>{currentVisual.make}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+```
+
+
+#### Login `Login.jsx`
+
+```js
+
+
+const handleSubmit = async (e) => {
+  // Previeni il comportamento predefinito del form (evita il ricaricamento della pagina)
+  e.preventDefault();
+
+  try {
+    // Effettua una richiesta POST al backend per il login
+    const response = await axios.post(
+      'https://192.168.4.182:7014/api/Productions/login',
+      {
+        Username: user,
+        Password: password
+      }
+    );
+
+    // Estrai il token dalla risposta del backend
+    const { token } = response.data;
+
+    // Salva il token nel localStorage per mantenerlo tra le sessioni
+    localStorage.setItem('token', token);
+    console.log("Token salvato:", token);
+
+    // Reindirizza manualmente il componente a /visual
+    navigate("/visual");
+  } catch (error) {
+    // Gestisci gli errori durante il login, ad esempio mostrando un messaggio di errore
+    console.error('Errore durante il login:', error);
+  }
+};
+```

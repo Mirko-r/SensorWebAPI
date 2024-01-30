@@ -10,12 +10,12 @@
 using System;
 using System.Reflection;
 
-[assembly: System.Reflection.AssemblyCompanyAttribute("ProducerSensor")]
+[assembly: System.Reflection.AssemblyCompanyAttribute("WebApi")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
 [assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d2fa7b56efffe32434a9b4af22dfc894a77767ed")]
-[assembly: System.Reflection.AssemblyProductAttribute("ProducerSensor")]
-[assembly: System.Reflection.AssemblyTitleAttribute("ProducerSensor")]
+[assembly: System.Reflection.AssemblyProductAttribute("WebApi")]
+[assembly: System.Reflection.AssemblyTitleAttribute("WebApi")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
 
 // Generato dalla classe WriteCodeFragment di MSBuild.
