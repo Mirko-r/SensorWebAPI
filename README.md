@@ -25,7 +25,7 @@ Il broker di messaggi RabbitMQ è utilizzato per garantire una comunicazione asi
 
 Il design pattern Model-View-Controller (MVC) è utilizzato nella progettazione e implementazione del servizio web ASP.NET Core. Questo pattern divide l'applicazione in tre componenti principali:
 
-- **Modello:** rappresenta i dati e la logica di business.
+- **Modello:** rappresenta i dati.
 - **Vista:** gestisce l'interfaccia utente.
 - **Controller:** gestisce le interazioni tra la Vista e il Modello.
 
