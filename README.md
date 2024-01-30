@@ -1,4 +1,4 @@
-# Esercitazione finale
+# SensorWebAPI
 
 ## 1. Introduzione
 
