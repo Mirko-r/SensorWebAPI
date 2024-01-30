@@ -134,3 +134,9 @@ C:\Users\04mir\source\repos\FinalEsercitation\WebApi\obj\Release\net8.0\refint\W
 C:\Users\04mir\source\repos\FinalEsercitation\WebApi\obj\Release\net8.0\WebApi.pdb
 C:\Users\04mir\source\repos\FinalEsercitation\WebApi\obj\Release\net8.0\WebApi.genruntimeconfig.cache
 C:\Users\04mir\source\repos\FinalEsercitation\WebApi\obj\Release\net8.0\ref\WebApi.dll
+C:\Users\04mir\source\repos\FinalEsercitation\WebApi\bin\Release\net8.0\Microsoft.OpenApi.dll
+C:\Users\04mir\source\repos\FinalEsercitation\WebApi\bin\Release\net8.0\Swashbuckle.AspNetCore.Swagger.dll
+C:\Users\04mir\source\repos\FinalEsercitation\WebApi\bin\Release\net8.0\Swashbuckle.AspNetCore.SwaggerGen.dll
+C:\Users\04mir\source\repos\FinalEsercitation\WebApi\bin\Release\net8.0\Swashbuckle.AspNetCore.SwaggerUI.dll
+C:\Users\04mir\source\repos\FinalEsercitation\WebApi\obj\Release\net8.0\WebApi.MvcApplicationPartsAssemblyInfo.cs
+C:\Users\04mir\source\repos\FinalEsercitation\WebApi\bin\Release\net8.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll

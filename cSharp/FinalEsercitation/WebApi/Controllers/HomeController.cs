@@ -19,7 +19,7 @@ namespace WebApi.Controllers
         }
 
         [HttpPost]
-        public IActionResult AddProductionInfo(MachineBindingTarget model)
+        public async Task<IActionResult> AddProductionInfo(MachineBindingTarget model)
         {
             if (!ModelState.IsValid)
             {
@@ -44,9 +44,9 @@ namespace WebApi.Controllers
                     make = model.Make
                 };
 
-                _context.Machines.Add(m);
-                _context.Productions.Add(p);
-                _context.SaveChanges();
+                await _context.Machines.AddAsync(m);
+                await _context.Productions.AddAsync(p);
+                await _context.SaveChangesAsync();
 
                 // Redirect a una pagina successiva o visualizza un messaggio di successo
                 return RedirectToAction("Success");

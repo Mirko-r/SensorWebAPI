@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Docu.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/*
+Date: 24 Fev 2015
+Author: Pedro Oliveira <kanytu@gmail . com>
+*/
+
+.hljs {
+  color: #a9b7c6;
+  background: #282b2e;
+  display: block;
+  overflow-x: auto;
+  padding: 0.5em;
+}
+
+.hljs-number,
+.hljs-literal,
+.hljs-symbol,
+.hljs-bullet {
+  color: #6897BB;
+}
+
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-deletion {
+  color: #cc7832;
+}
+
+.hljs-variable,
+.hljs-template-variable,
+.hljs-link {
+  color: #629755;
+}
+
+.hljs-comment,
+.hljs-quote {
+  color: #808080;
+}
+
+.hljs-meta {
+  color: #bbb529;
+}
+
+.hljs-string,
+.hljs-attribute,
+.hljs-addition {
+  color: #6A8759;
+}
+
+.hljs-section,
+.hljs-title,
+.hljs-type {
+  color: #ffc66d;
+}
+
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class {
+  color: #e8bf6a;
+}
+
+.hljs-emphasis {
+  font-style: italic;
+}
+
+.hljs-strong {
+  font-weight: bold;
+}
+
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="esercitazione-finale">Esercitazione finale</h1>
+<h2 id="1-introduzione">1. Introduzione</h2>
+<h3 id="11-scenario">1.1 Scenario</h3>
+<p>Consideriamo un'azienda fittizia distribuita su territorio nazionale che produce componenti elettronici. La produzione è gestita da macchine dotate di sensori, che inviano informazioni a un broker di messaggi. Le informazioni vengono poi consumate da un'applicazione .NET che le memorizza in un database. I dati di produzione sono esposti attraverso un servizio web ASP.NET Core, con autenticazione JWT. Infine, una dashboard SPA React consente di visualizzare i dati in tempo reale e interagire con essi.</p>
+<h3 id="12-tech-stack">1.2 Tech Stack</h3>
+<ul>
+<li><strong>.NET:</strong> Utilizzato per lo sviluppo delle applicazioni console e del servizio web.</li>
+<li><strong>RabbitMQ:</strong> Broker di messaggi per la gestione delle code.</li>
+<li><strong>Entity Framework Core:</strong> ORM per l'accesso al database.</li>
+<li><strong>ASP.NET Core:</strong> Framework per lo sviluppo del servizio web API.</li>
+<li><strong>React:</strong> Libreria JavaScript per lo sviluppo della dashboard SPA.</li>
+<li><strong>JWT (JSON Web Token):</strong> Utilizzato per l'autenticazione nelle API.</li>
+<li><strong>Swagger:</strong> Utilizzato per documentare il servizio web ASP.NET Core.</li>
+<li><strong>Postman:</strong> Utilizzato per testare gli endpoint del servizio web.</li>
+</ul>
+<h3 id="13-ruolo-di-rabbitmq">1.3 Ruolo di RabbitMq</h3>
+<p>Il broker di messaggi RabbitMQ è utilizzato per garantire una comunicazione asincrona tra le macchine produttive e il sistema di raccolta dati. Ogni macchina invia i dati di produzione ad una coda nel broker, e poi i messaggi verranno letti in modo asincrono.</p>
+<h3 id="14-mvc-desing-pattern">1.4 MVC Desing Pattern</h3>
+<p>Il design pattern Model-View-Controller (MVC) è utilizzato nella progettazione e implementazione del servizio web ASP.NET Core. Questo pattern divide l'applicazione in tre componenti principali:</p>
+<ul>
+<li><strong>Modello:</strong> rappresenta i dati e la logica di business.</li>
+<li><strong>Vista:</strong> gestisce l'interfaccia utente.</li>
+<li><strong>Controller:</strong> gestisce le interazioni tra la Vista e il Modello.</li>
+</ul>
+<h3 id="15-autenticazioneautorizzazione-jwt">1.5 Autenticazione/Autorizzazione JWT</h3>
+<ul>
+<li><strong>Autenticazione:</strong> è il processo di verifica dell'identità dell'utente  per proteggere risorse sensibili e garantire che solo gli utenti autorizzati possano accedervi.</li>
+<li><strong>Autorizzazione:</strong> Determina quali azioni può eseguire l'utente autenticato, il sistema deve determinare quali azioni o risorse l'utente è autorizzato a utilizzare. Ad esempio, un utente può avere il permesso di leggere dati ma non di modificarli, o può avere l'accesso solo a determinate parti di un'applicazione.</li>
+</ul>
+<h3 id="151-jwt">1.5.1 Jwt</h3>
+<p>Un JSON Web Token (JWT) è composto da tre parti: Header, Payload e Signature (Firma). Ognuna di queste parti è codificata in Base64URL e concatenate con un punto (&quot;.&quot;). Il risultato finale è una stringa che rappresenta il token completo.</p>
+<ul>
+<li><strong>Header:</strong> contiene informazioni sull'alogoritmo utilizzato per la firma del token</li>
+<li><strong>Payload:</strong> contiene le informazioni utili del token. Le informazioni sono chiamate Claims e possono includere dati sull'utente, autorizzazioni, scadenza del token, roles, audience e issuer.</li>
+<li><strong>Signature:</strong> è il risultato della firma digitale dell'Header e del Payload combinati con una chiave segreta.</li>
+</ul>
+<h2 id="2-web-app">2. Web App</h2>
+<h3 id="21-productionscontroller">2.1 ProductionsController</h3>
+<h4 id="httpget-all">HttpGet All</h4>
+<pre class="hljs"><code><div>[<span class="hljs-meta">HttpGet</span>]
+<span class="hljs-function"><span class="hljs-keyword">public</span> IEnumerable&lt;<span class="hljs-keyword">object</span>&gt; <span class="hljs-title">GetAll</span>(<span class="hljs-params"></span>)</span>
+{
+    <span class="hljs-keyword">return</span> _context.Productions.Include(p =&gt; p.Machine) 
+    <span class="hljs-comment">// Include la navigazione alla macchina associata</span>
+    .Select(p =&gt; <span class="hljs-keyword">new</span>
+    {
+        ProductionId = p.ProductionId,
+        MachineId = p.MachineId,
+        year = p.year,
+        month = p.month,
+        day = p.day,
+        hourOfDay = p.hourOfDay,
+        make = p.make,
+        MachineLocation = p.Machine.location
+    }).ToList();
+}
+</div></code></pre>
+<p>Questo END-Point viene usato da React  per caricare tutte le produzioni presenti nel database.
+Il metodo utilizza Entity Framework Core per accedere al database e recuperare le informazioni sulla produzione. Include anche la navigazione alla macchina associata per ottenere il dettaglio sulla sua posizione. I dati vengono quindi proiettati in un nuovo oggetto anonimo che include solo le informazioni rilevanti.</p>
+<h5 id="esempio-di-funzionamente-con-postman">Esempio di funzionamente con PostMan</h5>
+<p><img src="./Scrh/Postman_get_all.png" alt="img"></p>
+<h4 id="httpget-location">HttpGet location</h4>
+<pre class="hljs"><code><div>[<span class="hljs-meta">HttpGet(<span class="hljs-meta-string">"/filter/{location}"</span>)</span>]
+<span class="hljs-function"><span class="hljs-keyword">public</span> IActionResult <span class="hljs-title">GetByMachineLocation</span>(<span class="hljs-params"><span class="hljs-keyword">string</span> location</span>)</span>
+{
+    Machine? machine = _context.Machines.Where(m =&gt; m.location.Contains(location))
+        .Include(m =&gt; m.Productions).FirstOrDefault();
+    <span class="hljs-keyword">var</span> result = <span class="hljs-keyword">new</span>
+    {
+        Machine = <span class="hljs-keyword">new</span>
+        {
+            Location = machine.location,
+        },
+        Productions = machine.Productions
+    };
+
+    <span class="hljs-keyword">return</span> Ok(result);
+}
+</div></code></pre>
+<h4 id="httpget-machineid">HttpGet MachineID</h4>
+<pre class="hljs"><code><div>[<span class="hljs-meta">HttpGet(<span class="hljs-meta-string">"{machineId}"</span>)</span>]
+<span class="hljs-keyword">public</span> ActionResult&lt;IEnumerable&lt;<span class="hljs-keyword">object</span>&gt;&gt; GetByMachineId(<span class="hljs-keyword">string</span> machineId)
+{
+    <span class="hljs-comment">// Trova la macchina nel contesto del database in base all'ID fornito</span>
+    <span class="hljs-keyword">var</span> machineData = _context.Machines
+        .Where(m =&gt; m.MachineId == machineId)
+        <span class="hljs-comment">// Per ogni macchina trovata, seleziona le produzioni associate </span>
+        <span class="hljs-comment">//trasformate in un nuovo oggetto anonimo</span>
+        .Select(m =&gt; m.Productions.Select(p =&gt; <span class="hljs-keyword">new</span>
+        {
+            p.ProductionId,
+            p.MachineId,
+            p.year,
+            p.month,
+            p.day,
+            p.hourOfDay,
+            p.make,
+        })).ToList();
+
+    <span class="hljs-keyword">if</span> (machineData == <span class="hljs-literal">null</span>)
+    {
+        <span class="hljs-keyword">return</span> NotFound();
+    }
+
+    <span class="hljs-keyword">return</span> Ok(machineData);
+}
+</div></code></pre>
+<h5 id="esempio-di-funzionamente-con-postman">Esempio di funzionamente con PostMan</h5>
+<p><img src="./Scrh/Postman_get_by_MachineID.png" alt="img"></p>
+<h4 id="httpdelete-machineid">HttpDelete MachineID</h4>
+<pre class="hljs"><code><div>[<span class="hljs-meta">HttpDelete(<span class="hljs-meta-string">"{MachineId}"</span>)</span>]
+<span class="hljs-function"><span class="hljs-keyword">public</span> IActionResult <span class="hljs-title">DeletebyId</span>(<span class="hljs-params"><span class="hljs-keyword">string</span> MachineId</span>)</span>
+{
+    Machine machine = _context.Machines.Find(MachineId);
+
+    <span class="hljs-keyword">if</span> (machine == <span class="hljs-literal">null</span>)
+    {
+        <span class="hljs-keyword">return</span> NotFound();
+    }
+
+    List&lt;Production&gt; productionsToDelete = _context.Productions
+        .Where(p =&gt; p.MachineId == MachineId).ToList();
+
+    _context.Productions.RemoveRange(productionsToDelete);
+    _context.SaveChanges();
+
+    <span class="hljs-keyword">return</span> Ok(productionsToDelete);
+}
+</div></code></pre>
+<h5 id="esempio-di-funzionamente-con-postman">Esempio di funzionamente con PostMan</h5>
+<p><img src="./Scrh/Postman_delete_from_MachineId.png" alt="img"></p>
+<h4 id="httppost">HttpPost</h4>
+<pre class="hljs"><code><div> [<span class="hljs-meta">HttpPost</span>] <span class="hljs-comment">// post a production fromBody</span>
+ <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">async</span> Task&lt;IActionResult&gt; <span class="hljs-title">AddProd</span>(<span class="hljs-params">[FromBody] ProductionBindingTarget prod</span>)</span>
+ {
+         <span class="hljs-keyword">if</span> (prod != <span class="hljs-literal">null</span>)
+         {
+             <span class="hljs-keyword">var</span> production = <span class="hljs-keyword">new</span> Production
+             {
+                 MachineId = prod.MachineId,
+                 year = prod.Year,
+                 month = prod.Month,
+                 day = prod.Day,
+                 hourOfDay = prod.HourOfDay,
+                 make = prod.Make
+             };
+
+             <span class="hljs-keyword">await</span> _context.Productions.AddAsync(production);
+             <span class="hljs-keyword">await</span> _context.SaveChangesAsync();
+
+             <span class="hljs-keyword">return</span> Ok(production);
+         }
+         <span class="hljs-keyword">else</span>
+         {
+             <span class="hljs-keyword">return</span> BadRequest(<span class="hljs-string">"Dati della produzione non validi."</span>);
+         }
+ }
+</div></code></pre>
+<h5 id="esempio-di-funzionamente-con-postman">Esempio di funzionamente con PostMan</h5>
+<p><img src="./Scrh/Postman_post_productions.png" alt="img"></p>
+
+</body>
+</html>
